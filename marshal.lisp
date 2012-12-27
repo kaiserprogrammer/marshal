@@ -1,8 +1,17 @@
 (defpackage :marshal
-  (:use :cl :fiveam)
-  (:shadow :load))
+  (:use :cl)
+  (:shadow :load)
+  (:export :load :dump))
 
 (in-package :marshal)
+
+(defmacro maybe-dump-ref (o &body body)
+  (let ((g (gensym)))
+    `(let ((,g ,o))
+       (if (gethash ,g *refs*)
+           (dump-ref (gethash ,g *refs*))
+           (progn (setf (gethash ,g *refs*) (next-ref))
+                  ,@body)))))
 
 (defvar *refs*)
 (defvar *next-ref*)
@@ -28,14 +37,6 @@
 (defmethod dump-helper ((h hash-table))
   (maybe-dump-ref h
     (format nil "(marshal::dumped :hash-table ~a ~w ~w)" (gethash h *refs*) (hash-table-test h) (dump-hash-table h))))
-
-(defmacro maybe-dump-ref (o &body body)
-  (let ((g (gensym)))
-    `(let ((,g ,o))
-       (if (gethash ,g *refs*)
-           (dump-ref (gethash ,g *refs*))
-           (progn (setf (gethash ,g *refs*) (next-ref))
-                  ,@body)))))
 
 (defmethod dump-helper ((s symbol))
   (format nil "~w" s))
