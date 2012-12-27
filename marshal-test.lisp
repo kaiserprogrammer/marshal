@@ -5,7 +5,11 @@
 (def-suite marshal)
 (in-suite marshal)
 
-(defclass test-object () ())
+(defclass test-object ()
+  (test-slot))
+
+(defclass test-inherited (test-object)
+  (parent-slot))
 
 (test marshaling-simple-objects
   (is (string= "string"
@@ -49,7 +53,19 @@
   (let ((a (make-array (list 3 3) :initial-element #\h)))
     (setf (aref a 1 2) (make-instance 'test-object))
     (is (eq 'test-object
-            (class-name (class-of (aref (marshal:load (marshal:dump a)) 1 2)))))))
+            (class-name (class-of (aref (marshal:load (marshal:dump a)) 1 2))))))
+  (let ((o (make-instance 'test-object)))
+    (setf (slot-value o 'test-slot) t)
+    (is (eq t
+            (slot-value (marshal:load (marshal:dump o)) 'test-slot))))
+  (let ((o (make-instance 'test-inherited)))
+    (setf (slot-value o 'test-slot) t)
+    (setf (slot-value o 'parent-slot) o)
+    (let ((lo (marshal:load (marshal:dump o))))
+      (is (eq t
+              (slot-value lo 'test-slot)))
+      (is (eq lo
+              (slot-value lo 'parent-slot))))))
 
 (test marshaling-with-references
   (let* ((o (make-instance 'test-object))

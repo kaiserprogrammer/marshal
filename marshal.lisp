@@ -64,8 +64,8 @@
 
 (defun load-array (ref dim list)
   (let ((a (make-array dim)))
-    (load-array-helper list a (list))
     (setf (gethash ref *refs*) a)
+    (load-array-helper list a (list))
     a))
 
 (defun load-array-helper (list a ref)
@@ -113,20 +113,20 @@
 
 (defun load-object (ref class slots-desc)
   (let ((o (make-instance class)))
-    (loop for (slot-name . slot-value) in slots-desc
-       do (setf (slot-value o (load-helper slot-name)) (load-helper slot-value)))
     (setf (gethash ref *refs*) o)
+    (loop for (slot-name . slot-value) in slots-desc
+       do (setf (slot-value o slot-name) (load-helper slot-value)))
     o))
 
 (defun load-hash-table (ref test desc)
   (let ((h (make-hash-table :test test)))
+    (setf (gethash ref *refs*) h)
     (loop for (k . v) in desc
        do (setf (gethash (load-helper k) h) (load-helper v)))
-    (setf (gethash ref *refs*) h)
     h))
 
 (defun dump-slot-definitions (object)
   (let ((slots (mapcar #'closer-mop:slot-definition-name (closer-mop:class-slots (class-of object)))))
     (loop for slot in slots
        when (slot-boundp object slot)
-       collect (cons slot (slot-value object slot)))))
+       collect (cons slot (dump-helper (slot-value object slot))))))
