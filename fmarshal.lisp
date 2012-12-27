@@ -1,9 +1,9 @@
-(defpackage :marshal
+(defpackage :fmarshal
   (:use :cl)
   (:shadow :load)
   (:export :load :dump))
 
-(in-package :marshal)
+(in-package :fmarshal)
 
 (defmacro maybe-dump-ref (o &body body)
   (let ((g (gensym)))
@@ -30,13 +30,13 @@
   (format nil "~w" n))
 (defmethod dump-helper ((l cons))
   (maybe-dump-ref l
-   (format nil "(marshal::dumped :list ~a ~w)" (gethash l *refs*) (mapcar #'dump-helper l))))
+   (format nil "(fmarshal::dumped :list ~a ~w)" (gethash l *refs*) (mapcar #'dump-helper l))))
 (defmethod dump-helper ((a array))
   (maybe-dump-ref a
-    (format nil "(marshal::dumped :array ~a ~w ~w)" (gethash a *refs*) (array-dimensions a) (dump-array a))))
+    (format nil "(fmarshal::dumped :array ~a ~w ~w)" (gethash a *refs*) (array-dimensions a) (dump-array a))))
 (defmethod dump-helper ((h hash-table))
   (maybe-dump-ref h
-    (format nil "(marshal::dumped :hash-table ~a ~w ~w)" (gethash h *refs*) (hash-table-test h) (dump-hash-table h))))
+    (format nil "(fmarshal::dumped :hash-table ~a ~w ~w)" (gethash h *refs*) (hash-table-test h) (dump-hash-table h))))
 
 (defmethod dump-helper ((s symbol))
   (format nil "~w" s))
@@ -46,10 +46,10 @@
 
 (defmethod dump-helper (object)
   (maybe-dump-ref object
-    (format nil "(marshal::dumped ~a ~w ~w)" (gethash object *refs*) (class-name (class-of object)) (dump-slot-definitions object))))
+    (format nil "(fmarshal::dumped ~a ~w ~w)" (gethash object *refs*) (class-name (class-of object)) (dump-slot-definitions object))))
 
 (defun dump-ref (ref)
-  (format nil "(marshal::dumped :ref ~a)" ref))
+  (format nil "(fmarshal::dumped :ref ~a)" ref))
 
 (defun dump-array (a)
   (dump-array-helper (array-dimensions a) a nil))
@@ -92,7 +92,7 @@
 
 
 (defun marshalize (desc)
-  (if (or (not (consp desc)) (not (eq 'marshal::dumped (first desc))))
+  (if (or (not (consp desc)) (not (eq 'fmarshal::dumped (first desc))))
       (if (consp desc)
           (mapcar #'load-helper desc)
           desc)

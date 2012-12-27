@@ -1,10 +1,10 @@
-(asdf:defsystem marshal-test
+(asdf:defsystem fmarshal-test
   :version "0"
   :description "Test marshal library"
   :maintainer "Jürgen Bickert <juergenbickert@gmail.com>"
   :author "Jürgen Bickert <juergenbickert@gmail.com>"
   :licence "BSD-style"
-  :depends-on (fiveam marshal)
+  :depends-on (fiveam fmarshal)
   :serial t
   ;; components likely need manual reordering
-  :components ((:file "marshal-test")))
+  :components ((:file "fmarshal-test")))

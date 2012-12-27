@@ -1,4 +1,4 @@
-(asdf:defsystem marshal
+(asdf:defsystem fmarshal
   :version "0"
   :description "dump and load objects"
   :maintainer "Jürgen Bickert <juergenbickert@gmail.com>"
@@ -8,4 +8,4 @@
   :serial t
   ;; components likely need manual reordering
   :components ((:static-file "README.org" :pathname "README.org")
-               (:file "marshal")))
+               (:file "fmarshal")))
