@@ -1,17 +1,17 @@
 * Use Cases
 ** DONE Marshal List
 #+BEGIN_SRC lisp
-  (marshal:load (marshal:dump (list 1 (list 2 3) 4)))
+  (fmarshal:load (fmarshal:dump (list 1 (list 2 3) 4)))
   ;; => (1 (2 3) 4)
 
 #+END_SRC
 
 ** DONE Marshal Vector
 #+BEGIN_SRC lisp
-  (marshal:load (marshal:dump #(1 #(2 3) 4)))
+  (fmarshal:load (fmarshal:dump #(1 #(2 3) 4)))
   ;; => #(1 #(2 3) 4)
 
-  (marshal:load (marshal:dump (make-array (list 2 2) :initial-element 0)))
+  (fmarshal:load (fmarshal:dump (make-array (list 2 2) :initial-element 0)))
   ;; => # #2A((0 0) (0 0))
 
 #+END_SRC
@@ -21,7 +21,7 @@
 
   (let ((h (make-hash-table :test 'equal)))
     (setf (gethash "blub" h) t)
-    (gethash "blub" (marshal:load (marshal:dump h))))
+    (gethash "blub" (fmarshal:load (fmarshal:dump h))))
   ;; => T
 
 
@@ -34,7 +34,7 @@
 
   (let ((o (make-instance 'test-object)))
     (setf (slot-value o 'test-slot) "blub")
-    (slot-value (marshal:load (marshal:dump o)) 'test-slot))
+    (slot-value (fmarshal:load (fmarshal:dump o)) 'test-slot))
   ;; => "blub"
 
 #+END_SRC
@@ -46,7 +46,7 @@
   (let ((o (make-instance 'test-inherited)))
     (setf (slot-value o 'test-slot) "blub")
     (setf (slot-value o 'object-slot) o)
-    (let ((loaded-object (marshal:load (marshal:dump o))))
+    (let ((loaded-object (fmarshal:load (fmarshal:dump o))))
       (values
        (slot-value loaded-object 'test-slot)
        (eq loaded-object (slot-value loaded-object 'object-slot)))))
