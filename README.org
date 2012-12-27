@@ -1,0 +1,6 @@
+* Use Cases
+** DONE Marshal List
+** DONE Marshal Vector
+** DONE Marshal Hashmap
+** DONE Marshal Object
+** Marshal References
