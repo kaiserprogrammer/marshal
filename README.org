@@ -1,6 +1,55 @@
 * Use Cases
 ** DONE Marshal List
+#+BEGIN_SRC lisp
+  (marshal:load (marshal:dump (list 1 (list 2 3) 4)))
+  ;; => (1 (2 3) 4)
+
+#+END_SRC
+
 ** DONE Marshal Vector
+#+BEGIN_SRC lisp
+  (marshal:load (marshal:dump #(1 #(2 3) 4)))
+  ;; => #(1 #(2 3) 4)
+
+  (marshal:load (marshal:dump (make-array (list 2 2) :initial-element 0)))
+  ;; => # #2A((0 0) (0 0))
+
+#+END_SRC
+
 ** DONE Marshal Hashmap
+#+BEGIN_SRC lisp
+
+  (let ((h (make-hash-table :test 'equal)))
+    (setf (gethash "blub" h) t)
+    (gethash "blub" (marshal:load (marshal:dump h))))
+  ;; => T
+
+
+#+END_SRC
+
 ** DONE Marshal Object
-** Marshal References
+#+BEGIN_SRC lisp
+  (defclass test-object ()
+    (test-slot))
+
+  (let ((o (make-instance 'test-object)))
+    (setf (slot-value o 'test-slot) "blub")
+    (slot-value (marshal:load (marshal:dump o)) 'test-slot))
+  ;; => "blub"
+
+#+END_SRC
+** DONE Marshal References
+#+BEGIN_SRC lisp
+  (defclass test-inherited (test-object)
+    (object-slot))
+
+  (let ((o (make-instance 'test-inherited)))
+    (setf (slot-value o 'test-slot) "blub")
+    (setf (slot-value o 'object-slot) o)
+    (let ((loaded-object (marshal:load (marshal:dump o))))
+      (values
+       (slot-value loaded-object 'test-slot)
+       (eq loaded-object (slot-value loaded-object 'object-slot)))))
+  ;; => "blub", T
+
+#+END_SRC
