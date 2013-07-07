@@ -46,7 +46,7 @@
     (progn
       (format stream "(fmarshal::dumped :array ~a ~a " (gethash a *refs*) (array-dimensions a))
       (dump-array a stream)
-      (write-string "closear)" stream))))
+      (write-string ")" stream))))
 
 (defmethod dump-helper ((h hash-table) stream)
   (maybe-dump-ref h
