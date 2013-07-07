@@ -81,8 +81,9 @@
                    (dump-helper v))))
 
 (defun load (stream)
-  (let ((*refs* (make-hash-table)))
-    (load-helper stream)))
+  (when stream
+    (let ((*refs* (make-hash-table)))
+      (load-helper stream))))
 
 (defun load-helper (stream)
     (marshalize
