@@ -30,13 +30,13 @@
   (format nil "~w" n))
 (defmethod dump-helper ((l cons))
   (maybe-dump-ref l
-   (format nil "(fmarshal::dumped :list ~a ~w)" (gethash l *refs*) (mapcar #'dump-helper l))))
+   (format nil "(fmarshal::dumped :list ~a ~a)" (gethash l *refs*) (mapcar #'dump-helper l))))
 (defmethod dump-helper ((a array))
   (maybe-dump-ref a
-    (format nil "(fmarshal::dumped :array ~a ~w ~w)" (gethash a *refs*) (array-dimensions a) (dump-array a))))
+    (format nil "(fmarshal::dumped :array ~a ~a ~a)" (gethash a *refs*) (array-dimensions a) (dump-array a))))
 (defmethod dump-helper ((h hash-table))
   (maybe-dump-ref h
-    (format nil "(fmarshal::dumped :hash-table ~a ~w ~w)" (gethash h *refs*) (hash-table-test h) (dump-hash-table h))))
+    (format nil "(fmarshal::dumped :hash-table ~a ~a ~a)" (gethash h *refs*) (hash-table-test h) (dump-hash-table h))))
 
 (defmethod dump-helper ((s symbol))
   (format nil "~w" s))
@@ -46,7 +46,7 @@
 
 (defmethod dump-helper (object)
   (maybe-dump-ref object
-    (format nil "(fmarshal::dumped ~a ~w ~w)" (gethash object *refs*) (class-name (class-of object)) (dump-slot-definitions object))))
+    (format nil "(fmarshal::dumped ~a ~a ~a)" (gethash object *refs*) (class-name (class-of object)) (dump-slot-definitions object))))
 
 (defun dump-ref (ref)
   (format nil "(fmarshal::dumped :ref ~a)" ref))
@@ -70,10 +70,10 @@
 
 (defun load-array-helper (list a ref)
   (if (atom list)
-      (setf (apply #'aref a (reverse ref)) (load list))
+      (setf (apply #'aref a (reverse ref)) (load-helper list))
       (loop for i from 0
          for e in list
-         do (load-array-helper e a (cons i ref)))))
+         do (load-array-helper (load-helper e) a (cons i ref)))))
 
 (defun dump-hash-table (h)
   (loop for v being the hash-values in h using (hash-key k)
@@ -83,16 +83,16 @@
 (defun load (stream)
   (when stream
     (let ((*refs* (make-hash-table)))
-      (load-helper stream))))
+      (unmarshalize stream))))
 
-(defun load-helper (stream)
-    (marshalize
+(defun unmarshalize (stream)
+  (load-helper
    (if (stringp stream)
        (read-from-string stream)
        (read stream))))
 
 
-(defun marshalize (desc)
+(defun load-helper (desc)
   (if (or (not (consp desc)) (not (eq 'fmarshal::dumped (first desc))))
       (if (consp desc)
           (mapcar #'load-helper desc)
