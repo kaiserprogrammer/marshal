@@ -39,14 +39,14 @@
     (format nil "(fmarshal::dumped :hash-table ~a ~a ~a)" (gethash h *refs*) (hash-table-test h) (dump-hash-table h))))
 
 (defmethod dump-helper ((s symbol))
-  (format nil "~w" s))
+  (format nil "~s" s))
 
 (defun next-ref ()
   (incf *next-ref*))
 
 (defmethod dump-helper (object)
   (maybe-dump-ref object
-    (format nil "(fmarshal::dumped ~a ~a ~a)" (gethash object *refs*) (class-name (class-of object)) (dump-slot-definitions object))))
+    (format nil "(fmarshal::dumped ~a ~s ~a)" (gethash object *refs*) (class-name (class-of object)) (dump-slot-definitions object))))
 
 (defun dump-ref (ref)
   (format nil "(fmarshal::dumped :ref ~a)" ref))
@@ -127,7 +127,10 @@
     h))
 
 (defun dump-slot-definitions (object)
-  (let ((slots (mapcar #'closer-mop:slot-definition-name (closer-mop:class-slots (class-of object)))))
-    (loop for slot in slots
-       when (slot-boundp object slot)
-       collect (cons slot (dump-helper (slot-value object slot))))))
+  (with-output-to-string (str)
+    (write-string "(" str)
+    (let ((slots (mapcar #'closer-mop:slot-definition-name (closer-mop:class-slots (class-of object)))))
+      (loop for slot in slots
+         when (slot-boundp object slot)
+         do (format str "(~s . ~a)" slot (dump-helper (slot-value object slot)))))
+    (write-string ")" str)))
