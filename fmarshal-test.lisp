@@ -37,6 +37,12 @@
                 (fmarshal:load (fmarshal:dump v)))))
   (let ((a (make-array (list 2 3 4) :initial-element 10)))
     (is (equalp a
+                (fmarshal:load (fmarshal:dump a)))))
+  (let ((a (make-array '(2 3 4)))
+        (l (list 1 2 3)))
+    (setf (aref a 0 0 0) l)
+    (setf (aref a 1 1 1) l)
+    (is (equalp a
                 (fmarshal:load (fmarshal:dump a))))))
 
 (test marshaling-hash-table

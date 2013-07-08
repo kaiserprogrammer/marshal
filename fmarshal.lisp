@@ -96,15 +96,15 @@
 (defun load-array (ref dim list)
   (let ((a (make-array dim)))
     (setf (gethash ref *refs*) a)
-    (load-array-helper list a (list))
+    (load-array-helper list a (list) dim)
     a))
 
-(defun load-array-helper (list a ref)
-  (if (atom list)
-      (setf (apply #'aref a (reverse ref)) (load-helper list))
-      (loop for i from 0
+(defun load-array-helper (list a ref dim)
+  (if (null dim)
+      (setf (apply #'aref a (reverse ref)) list)
+      (loop for i from 0 below (car dim)
          for e in list
-         do (load-array-helper (load-helper e) a (cons i ref)))))
+         do (load-array-helper (load-helper e) a (cons i ref) (cdr dim)))))
 
 (defun dump-hash-table (h stream)
   (write-string "(" stream)
