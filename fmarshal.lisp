@@ -35,9 +35,15 @@
   (maybe-dump-ref l
     (progn
       (format stream "(fmarshal::dumped :list ~a (" (gethash l *refs*))
-      (dolist (e l)
+      (do ((e l (cdr e)))
+          ((or (atom e) (null e)))
         (write-string " " stream)
-        (dump-helper e stream))
+        (if (and (atom (cdr e))
+                 (not (null (cdr e))))
+            (progn (dump-helper (car e) stream)
+                   (write-string " . " stream)
+                   (dump-helper (cdr e) stream))
+            (dump-helper (car e) stream)))
       (write-string ")" stream)
       (write-string ")" stream))))
 
@@ -139,9 +145,14 @@
                       (load-object (second desc) (third desc) (fourth desc))))))))
 
 (defun load-list (ref list)
-  (let ((l (mapcar #'load-helper list)))
-    (setf (gethash ref *refs*) l)
-    l))
+  (do ((e list (cdr e)))
+      ((or (atom e) (null e)))
+    (if (atom (cdr e))
+        (progn (setf (car e) (load-helper (car e)))
+               (setf (cdr e) (load-helper (cdr e))))
+        (setf (car e) (load-helper (car e)))))
+  (setf (gethash ref *refs*) list)
+  list)
 
 (defun load-object (ref class slots-desc)
   (let ((o (make-instance class)))

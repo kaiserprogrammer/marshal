@@ -26,6 +26,11 @@
     (is (equalp list
                 (fmarshal:load (fmarshal:dump list))))))
 
+(test marshaling-dotted-lists
+  (let ((dlist '((1 . 2) (5 . 3))))
+    (is (equalp dlist
+                (fmarshal:load (fmarshal:dump dlist))))))
+
 (test marshaling-vector
   (let ((v #(1 2 3 #("blub" "this" "that" #\c))))
     (is (equalp v
