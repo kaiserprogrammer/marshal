@@ -1,5 +1,5 @@
 (asdf:defsystem fmarshal
-  :version "0"
+  :version "1.0.0"
   :description "dump and load objects"
   :maintainer "Jürgen Bickert <juergenbickert@gmail.com>"
   :author "Jürgen Bickert <juergenbickert@gmail.com>"
