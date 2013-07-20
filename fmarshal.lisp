@@ -56,7 +56,7 @@
 (defmethod dump-helper ((h hash-table) stream)
   (maybe-dump-ref h
     (progn
-      (write-string "(:fm :hash-table " stream)
+      (write-string "(:fmarshal-hash-table " stream)
       (format stream "~a " (hash-table-test h))
       (dump-hash-table h stream)
       (write-string ")" stream))))
@@ -70,13 +70,13 @@
 (defmethod dump-helper (object stream)
   (maybe-dump-ref object
     (progn
-      (write-string "(:fm " stream)
+      (write-string "(:fmarshal-object " stream)
       (format stream "~s " (class-name (class-of object)))
       (dump-slot-definitions object stream)
       (write-string ")" stream))))
 
 (defun dump-ref (ref stream)
-  (format stream "(:fm :ref ~a)" ref))
+  (format stream "(:fmarshal-ref ~a)" ref))
 
 (defun dump-array (a stream)
   (dump-array-helper (array-dimensions a) a nil stream))
@@ -128,19 +128,20 @@
 
 
 (defun load-helper (desc)
+  ;; beware order is important string is an array and both are atoms
   (if (stringp desc)
       (load-string desc)
       (if (arrayp desc)
           (load-array desc)
           (if (atom desc)
               desc
-              (if (not (eq :fm (first desc)))
-                  (load-list desc)
-                  (if (eq :hash-table (second desc))
-                      (load-hash-table (third desc) (fourth desc))
-                      (if (eq :ref (second desc))
-                          (gethash (third desc) *refs*)
-                          (load-object (second desc) (third desc)))))))))
+              (if (eq :fmarshal-hash-table (first desc))
+                  (load-hash-table (second desc) (third desc))
+                  (if (eq :fmarshal-ref (first desc))
+                      (gethash (second desc) *refs*)
+                      (if (eq :fmarshal-object (first desc))
+                          (load-object (second desc) (third desc))
+                          (load-list desc))))))))
 
 (defun load-string (s)
   (setf (gethash (next-ref) *refs*) s))
