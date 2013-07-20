@@ -26,7 +26,8 @@
 
 (defgeneric dump-helper (object stream))
 (defmethod dump-helper ((s string) stream)
-  (format stream "~w" s))
+  (maybe-dump-ref s
+    (format stream "~w" s)))
 (defmethod dump-helper ((c character) stream)
   (format stream "~w" c))
 (defmethod dump-helper ((n number) stream)
@@ -127,17 +128,22 @@
 
 
 (defun load-helper (desc)
-  (if (arrayp desc)
-      (load-array desc)
-      (if (atom desc)
-          desc
-          (if (not (eq :fm (first desc)))
-              (load-list desc)
-              (if (eq :hash-table (second desc))
-                  (load-hash-table (third desc) (fourth desc))
-                  (if (eq :ref (second desc))
-                      (gethash (third desc) *refs*)
-                      (load-object (second desc) (third desc))))))))
+  (if (stringp desc)
+      (load-string desc)
+      (if (arrayp desc)
+          (load-array desc)
+          (if (atom desc)
+              desc
+              (if (not (eq :fm (first desc)))
+                  (load-list desc)
+                  (if (eq :hash-table (second desc))
+                      (load-hash-table (third desc) (fourth desc))
+                      (if (eq :ref (second desc))
+                          (gethash (third desc) *refs*)
+                          (load-object (second desc) (third desc)))))))))
+
+(defun load-string (s)
+  (setf (gethash (next-ref) *refs*) s))
 
 (defun load-list (list)
   (setf (gethash (next-ref) *refs*) list)

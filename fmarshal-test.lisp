@@ -94,6 +94,11 @@
   (let* ((l (list 1 2 3))
          (ll (fmarshal:load (fmarshal:dump (list l l)))))
     (is (eq (first ll)
-            (second ll)))))
+            (second ll))))
+  (let* ((blub "blub")
+         (l (list blub (list 2 3) blub))
+         (ll (fmarshal:load (fmarshal:dump l))))
+    (is (eq (first ll)
+            (car (last ll))))))
 
 (run!)
